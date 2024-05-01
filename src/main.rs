@@ -136,7 +136,7 @@ async fn handler_hello2(Path(name): Path<String>) -> impl IntoResponse {
     Html(format!("Hello, {name}"))
 }
 
-/// Оба handler_hello и handler_hello2 являются обработчиками запросов, но различаются в том, как они получают параметры.
+// Оба handler_hello и handler_hello2 являются обработчиками запросов, но различаются в том, как они получают параметры.
 //
 // handler_hello получает параметры из строки запроса (query string), который обычно выглядит так:
 // ?param1=value1&param2=value2. Он использует тип Query для извлечения этих параметров из запроса.
