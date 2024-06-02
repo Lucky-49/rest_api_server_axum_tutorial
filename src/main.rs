@@ -1,4 +1,3 @@
-pub use self::error::{Error, Result};
 
 use axum::extract::{Path, Query};
 use axum::response::{Html, IntoResponse, Response};
@@ -14,7 +13,15 @@ use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
 
+mod web;
 mod error; //Подключает файл error.rs
+mod config;
+
+//#[cfg(test)] //Используется только для модульного тестирования
+pub mod _dev_utils;
+
+pub use self::error::{Error, Result};
+pub use config::config;
 
 #[tokio::main] //Атрибут, указывающий, что функция main() будет использовать Tokio runtime
 async fn main() -> Result<()> { //Объявление асинхронной функции main(), которая возвращает Result<()>. Это означает, что функция может выполняться асинхронно и может вернуть либо () в случае успеха, либо ошибку типа Result
@@ -24,12 +31,15 @@ async fn main() -> Result<()> { //Объявление асинхронной ф
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
+    //эта функция только для разработки
+    _dev_utils::init_dev().await;
+
 // region: ---Маршруты сервера
     let route_test_server = Router::new().route("/test_server", get(handler_test_server));
     let route_index = Router::new().route("/", get(handler_index));
 
-    // Обслуживание статических файлов из директории `game/app`
-    let static_files = get_service(ServeDir::new("game/app"));
+    // Обслуживание статических файлов из директории `web-folder`
+    let static_files = get_service(ServeDir::new("web-folder"));
 
     let routes_all = Router::new()
         .merge(route_test_server)
@@ -52,7 +62,7 @@ async fn main() -> Result<()> { //Объявление асинхронной ф
 }
 
 async fn handler_index() -> Html<&'static str> {
-    Html(include_str!("../game/app/index.html"))
+    Html(include_str!("../web-folder/index.html"))
 }
 
 async fn handler_test_server() -> impl IntoResponse {
